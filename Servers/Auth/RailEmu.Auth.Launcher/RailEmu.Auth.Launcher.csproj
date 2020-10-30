@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Common\RailEmu.Core\RailEmu.Core.csproj" />
+    <ProjectReference Include="..\..\..\Common\RailEmu.Database\RailEmu.Database.csproj" />
+    <ProjectReference Include="..\..\..\Common\RailEmu.Network\RailEmu.Network.csproj" />
+    <ProjectReference Include="..\RailEmu.Auth.Database\RailEmu.Auth.Database.csproj" />
+  </ItemGroup>
+
+</Project>
