@@ -15,7 +15,7 @@
 #endregion
 using System.IO;
 using System.IO.Compression;
-using zlib;
+//using zlib;
 
 namespace RailEmu.Protocol.IO
 {
@@ -59,11 +59,12 @@ namespace RailEmu.Protocol.IO
 
         public static void Deflate(Stream input, Stream output)
         {
-            var zoutput = new ZOutputStream(output);
+            //TODO: Implement ZLib
+            //var zoutput = new ZOutputStream(output);
             var inputReader = new BinaryReader(input);
 
-            zoutput.Write(inputReader.ReadBytes((int)input.Length), 0, (int)input.Length);
-            zoutput.Flush();
+            //zoutput.Write(inputReader.ReadBytes((int)input.Length), 0, (int)input.Length);
+            //zoutput.Flush();
         }
     }
 }

@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using RailEmu.Auth.Database.Interfaces;
-using RailEmu.Network.Protocol;
+using RailEmu.Network.Network;
 using System;
-using System.Net;
-using System.Net.Sockets;
 
 namespace RailEmu.Auth.Launcher
 {
@@ -13,18 +11,23 @@ namespace RailEmu.Auth.Launcher
         private readonly ILogger<AuthApplication> logger;
 
         public AuthApplication(IAccountRepository repository,
-            ILogger<AuthApplication> logger)
+            ILogger<AuthApplication> logger,
+            TcpServer tcpServer)
         {
             this.repository = repository;
             this.logger = logger;
+            TcpServer = tcpServer;
             logger.LogDebug("Initializing AuthApplication");
             logger.LogInformation("AuthApplication initialized");
         }
 
+        public TcpServer TcpServer { get; }
+
         public void Run()
         {
-            //Main function of auth server
-            throw new NotImplementedException();
+            TcpServer.Init();
+            TcpServer.Start();
+            Console.ReadKey();
         }
     }
 }

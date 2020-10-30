@@ -1,42 +1,43 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using RailEmu.Network.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 
 namespace RailEmu.Network.Network
 {
-    public class TcpServer : IDisposable
+    public abstract class TcpServer : IDisposable
     {
         private Socket _socket;
         private IPAddress _iPAddress;
         public readonly List<TcpClient> Clients;
         private readonly int _port;
-        private Type _clientDataType;
+        private readonly ILogger<TcpServer> logger;
+        private readonly IMessageManager messageManager;
 
         public bool IsRunning { get; private set; }
 
-        public TcpServer(string ipAddress, int port)
+        protected TcpServer(ILogger<TcpServer> logger,
+            IMessageManager messageManager)
         {
+            //TODO: Pass ipaddress & port to configuration
+            string ipAddress = "127.0.0.1";
+            int port = 443;
+
             IPAddress.TryParse(ipAddress, out _iPAddress);
             _port = port;
             Clients = new List<TcpClient>();
+            this.logger = logger;
+            this.messageManager = messageManager;
         }
 
         public void Init()
         {
-            try
-            {
-                _clientDataType = Assembly.GetEntryAssembly().GetTypes().First(x => x.GetInterface(nameof(IClientData)) != null);
-                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _socket.Bind(new IPEndPoint(_iPAddress, _port));
+            _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _socket.Bind(new IPEndPoint(_iPAddress, _port));
 
-                MessageManager.Instance.Init();
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-            }
+            messageManager.Init();
         }
 
         public void Start()
@@ -44,6 +45,7 @@ namespace RailEmu.Network.Network
             _socket.Listen(0);
             BeginAccept();
             IsRunning = true;
+            logger.LogInformation("Server started on {0}:{1}", _iPAddress, _port);
         }
 
         public void Stop()
@@ -61,13 +63,19 @@ namespace RailEmu.Network.Network
         {
             Socket socket = _socket.EndAccept(result);
 
-            TcpClient client = new TcpClient(socket, (IClientData)Activator.CreateInstance(_clientDataType));
-            Logger.Debug("Nouveau client");
+            //TODO: Faire une méthode abstraite qui retourne un IClientData pour un nouvel utilisateur
+            IClientData clientData = CreateNewClientData();
+
+            //TODO: Créer l'objet client
+            TcpClient client = null;
+            logger.LogDebug("Nouveau client");
             Clients.Add(client);
             client.Init();
 
             BeginAccept();
         }
+
+        protected abstract IClientData CreateNewClientData();
 
         #region IDisposable Support
 
@@ -80,7 +88,7 @@ namespace RailEmu.Network.Network
             {
                 if (disposing)
                 {
-                    _socket.Dispose();
+                    _socket?.Dispose();
                 }
 
                 _iPAddress = null;
